@@ -1,4 +1,4 @@
-
+const crypto = require('crypto')
 
 class Util {
     constructor() {
@@ -15,6 +15,14 @@ class Util {
         const maxFloored = Math.floor(max);
 
         return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled)
+    }
+
+    verifySignature = (data, signature, publicKey) => {
+        const verify = crypto.createVerify('SHA256')
+            .update(data.toString())
+            .end();
+
+        return verify.verify(publicKey, signature)
     }
 }
 

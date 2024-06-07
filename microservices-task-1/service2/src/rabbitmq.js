@@ -1,6 +1,5 @@
 const amqplib = require('amqplib')
-const requestsQueue = 'tasks'
-const responsesQueue = 'amq.rabbitmq.reply-to'
+const util = require('./util')
 
 class RabbitMQ {
     constructor() {
@@ -11,34 +10,27 @@ class RabbitMQ {
         RabbitMQ.instanse = this
         RabbitMQ.exists = true
 
-        this.rabbit = amqplib
+        this.connection = amqplib.connect('amqp://localhost')
     }
 
-    sendMessage = async (msg) => {
-        const connection = await this.rabbit.connect('amqp://localhost')
-        const channel = await connection.createChannel()
+    consumeWithReply = async (consumeQueue) => {
+        this.connection = await this.connection
+        const channel = await this.connection.createChannel()
+        
+        channel.assertQueue(consumeQueue, {
+            durable: false
+        });
+        channel.prefetch(1);
 
-        // await channel.assertQueue(responsesQueue)
+        channel.consume(consumeQueue, (msg) => {
+            const data = util.generateSignature(msg.content)
 
-        channel.sendToQueue(responsesQueue, msg)
-        channel.close()
-    }
-
-    consumeMessages = async () => {
-        const connection = await this.rabbit.connect('amqp://localhost')
-        const channel = await connection.createChannel()
-
-        // await channel.assertQueue(responsesQueue)
-
-        channel.consume(requestsQueue, (msg) => {
-            if (msg !== null) {
-                const data = msg.content.toString()
-                console.log('Received:', msg);
-                // channel.ack(msg);
-            } else {
-                console.log('Consumer cancelled by server');
-            }
-        }, {noAck: true})
+            channel.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(data)), {
+                correlationId: msg.properties.correlationId
+            });
+      
+            channel.ack(msg);
+          });
     }
 }
 
