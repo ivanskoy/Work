@@ -1,0 +1,32 @@
+version: '1.0'
+
+services:
+  lo-users-storage:
+    image: mongo:6-jammy
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - lo_users_data:/data/mongo
+
+  lo-session-storage:
+    image: redis:6.2-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel warning
+    volumes: 
+      - lo_session_data:/data/redis
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    restart: unless-stopped
+    ports:
+      - '5540:5540'
+    volumes: 
+      - redis_insight_data:/data/redis_insight
+
+volumes:
+  lo_users_data:
+  lo_session_data:
+  redis_insight_data:
