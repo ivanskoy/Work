@@ -5,7 +5,7 @@ services:
     image: mongo:6-jammy
     restart: unless-stopped
     ports:
-      - '27017:27017'
+      - ${MONGO_DB_PORT}:${MONGO_DB_PORT}
     volumes:
       - lo_users_data:/data/mongo
 
@@ -13,7 +13,7 @@ services:
     image: redis:6.2-alpine
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - ${REDIS_PORT}:${REDIS_PORT}
     command: redis-server --save 60 1 --loglevel warning
     volumes: 
       - lo_session_data:/data/redis
