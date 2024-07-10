@@ -5,6 +5,7 @@ import { User } from 'src/schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreatedUserDto } from './dto/created-user.dto';
 import { FoundUserDto } from './dto/found-user.dto';
+import { OnlyDevelop } from 'src/decorators/only-develop.decorator';
 
 @Injectable()
 export class UserRepository {
@@ -12,13 +13,47 @@ export class UserRepository {
 
   async findByEmail(email: string) {
     try {
-      const { id, email: foundEmail } = await this.userModel
+      const foundUser = await this.userModel
         .findOne({ email: email }, { password: 0, __v: 0 })
         .exec();
+
+      if (!foundUser) {
+        return null;
+      }
+
+      const { id, email: foundEmail } = foundUser;
 
       return new FoundUserDto(id, foundEmail);
     } catch (error) {
       throw error;
+    }
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<CreatedUserDto> {
+    try {
+      const { id, email } = await this.userModel.create(createUserDto);
+
+      return new CreatedUserDto(id, email);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @OnlyDevelop()
+  async findAll(limit: number): Promise<User[]> {
+    try {
+      return await this.userModel.find().limit(limit);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @OnlyDevelop()
+  async deleteAll() {
+    try {
+      return await this.userModel.deleteMany();
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -39,16 +74,6 @@ export class UserRepository {
     }
   }
   */
-
-  async create(createUserDto: CreateUserDto): Promise<CreatedUserDto> {
-    try {
-      const { id, email } = await this.userModel.create(createUserDto);
-
-      return new CreatedUserDto(id, email);
-    } catch (err) {
-      throw err;
-    }
-  }
 
   /*
   async delete(id: string): Promise<User> {

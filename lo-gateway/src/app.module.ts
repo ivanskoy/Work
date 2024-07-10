@@ -6,17 +6,19 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { RedisModule } from './redis/redis.module';
 import { SessionModule } from './session/session.module';
+import { HashModule } from './hash/hash.module';
 
 import applicationConfig from './config/application.config';
 import mongoConfig from './config/mongo.config';
 import redisConfig from './config/redis.config';
+import hashConfig from './config/hash.config';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
     ConfigModule.forRoot({
-      load: [applicationConfig, mongoConfig, redisConfig],
+      load: [applicationConfig, mongoConfig, redisConfig, hashConfig],
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
@@ -28,6 +30,7 @@ import redisConfig from './config/redis.config';
     }),
     RedisModule,
     SessionModule,
+    HashModule,
   ],
   controllers: [],
   providers: [],

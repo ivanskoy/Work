@@ -16,11 +16,13 @@ export class AuthController {
     }
   }
 
-  /* login() {
+  /*
+  login() {
 
   }
 
   logout() {
 
-  } */
+  }
+  */
 }

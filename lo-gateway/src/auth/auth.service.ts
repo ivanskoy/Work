@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { OnlyDevelop } from 'src/decorators/only-develop.decorator';
+import { SessionService } from 'src/session/session.service';
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
 import { UserRepository } from 'src/user/user.repository';
 // import * as bcrypt from 'bcrypt';
@@ -6,8 +8,12 @@ import { UserRepository } from 'src/user/user.repository';
 
 @Injectable()
 export class AuthService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private sessionService: SessionService,
+  ) {}
 
+  @OnlyDevelop()
   async register(registerUserDto: RegisterUserDto) {
     try {
       const { email } = registerUserDto;
@@ -19,6 +25,7 @@ export class AuthService {
       }
 
       const createdUser = await this.userRepository.create(registerUserDto);
+      this.sessionService.createSession(createdUser.id);
     } catch (error) {
       throw error;
     }
